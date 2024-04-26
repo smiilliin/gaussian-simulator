@@ -23,3 +23,7 @@ npm run build
 ```
 
 ## Example
+
+
+https://github.com/smiilliin/gaussian-simulator/assets/121614843/c79026fd-16cb-42fd-ab8c-0748a2c83214
+
