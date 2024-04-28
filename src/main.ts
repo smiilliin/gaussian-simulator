@@ -189,38 +189,49 @@ const p = (a: number, b: number) => {
 
 const graph = new PIXI.Graphics();
 
+let prevX: number;
+let prevY: number;
+let lastDrawTime = Date.now();
+let x = 0;
+
 const draw = () => {
   graph.clear();
 
   graph.lineStyle(3, 0x777777, 0.8);
 
-  let prevX = app.screen.width / 2 + -blocksSize.x * Block.gapX;
-  let prevY = app.screen.height * 0.9 + Block.radius;
+  prevX = app.screen.width / 2 + -blocksSize.x * Block.gapX;
+  prevY = app.screen.height * 0.9 + Block.radius;
+  graph.moveTo(prevX, prevY);
+  lastDrawTime = Date.now();
+  x = -blocksSize.x;
+};
+
+const drawStep = () => {
+  if (Date.now() - lastDrawTime < 5) return;
+  if (x > blocksSize.x) return;
+
   graph.moveTo(prevX, prevY);
 
-  const drawStep = (x: number) => {
-    graph.moveTo(prevX, prevY);
+  const newX = app.screen.width / 2 + x * Block.gapX;
+  const newY =
+    app.screen.height * 0.9 +
+    Block.radius -
+    p(-1 / 2 + x, 1 / 2 + x) * N * Ball.radius * 2;
+  graph.lineTo(newX, newY);
 
-    const newX = app.screen.width / 2 + x * Block.gapX;
-    const newY =
-      app.screen.height * 0.9 +
-      Block.radius -
-      p(-1 / 2 + x, 1 / 2 + x) * N * Ball.radius * 2;
-    graph.lineTo(newX, newY);
+  prevX = newX;
+  prevY = newY;
 
-    prevX = newX;
-    prevY = newY;
+  x += 0.5;
 
-    if (x <= blocksSize.x) {
-      setTimeout(drawStep, 5, x + 0.25);
-    } else {
-      setTimeout(() => {
-        graph.clear();
-        start();
-      }, 3000);
-    }
-  };
-  setTimeout(drawStep, 5, -blocksSize.x);
+  if (x <= blocksSize.x) {
+    lastDrawTime = Date.now();
+  } else {
+    setTimeout(() => {
+      graph.clear();
+      start();
+    }, 3000);
+  }
 };
 
 view.addChild(graph);
@@ -241,5 +252,7 @@ app.ticker.add(() => {
   if (!done && end == balls.length) {
     draw();
     done = true;
+  } else if (done) {
+    drawStep();
   }
 });
